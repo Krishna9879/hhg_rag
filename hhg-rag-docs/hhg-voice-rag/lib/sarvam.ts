@@ -19,7 +19,7 @@ export async function transcribe(
   const env = getEnv();
   const apiKey = env.SARVAM_API_KEY;
   const apiUrl = env.SARVAM_API_URL || "https://api.sarvam.ai";
-  const modelName = options?.model || "saarika:v2";
+  const modelName = options?.model || "saarika:v2.5";
 
   if (!apiKey) {
     throw new HarnessError(

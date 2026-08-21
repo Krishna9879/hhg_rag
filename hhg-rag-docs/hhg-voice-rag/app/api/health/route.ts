@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getEnvSafe } from "@/lib/env";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const env = getEnvSafe();
   const status: Record<string, "ok" | "error" | "unconfigured"> = {
