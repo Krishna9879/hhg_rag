@@ -1,7 +1,7 @@
 {
-  "total_passages": 10,
-  "total_chunks_created": 40,
-  "collections_upserted": 40,
-  "timing_ms": 10245,
+  "total_passages": 20,
+  "total_chunks_created": 84,
+  "collections_upserted": 84,
+  "timing_ms": 10805,
   "failures": []
 }

@@ -1,62 +1,122 @@
 [
   {
     "id": "msmarco_hi_001",
-    "text": "भारत एक विविधताओं का देश है। यहाँ कई धर्म, भाषाएँ और संस्कृतियाँ एक साथ शांतिपूर्वक सह-अस्तित्व में रहती हैं। भारत की स्वतंत्रता १९४७ में मिली थी। देश की राजधानी नई दिल्ली है।",
+    "text": "भारत एक विविधताओं का देश है। यहाँ कई धर्म, भाषाएँ और संस्कृतियाँ एक साथ शांतिपूर्वक सह-अस्तित्व में रहती हैं। भारत को स्वतंत्रता १५ अगस्त १९४७ को मिली थी। भारत की राजधानी नई दिल्ली है और इसका सबसे बड़ा शहर मुंबई है।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "geography" }
   },
   {
     "id": "msmarco_hi_002",
-    "text": "कृत्रिम बुद्धिमत्ता (एआई) कंप्यूटर विज्ञान की एक शाखा है जो मशीनों को इंसानों की तरह सोचने और सीखने की क्षमता प्रदान करती है। यह स्वास्थ्य, शिक्षा और उद्योग में व्यापक रूप से उपयोग की जा रही है।",
+    "text": "कृत्रिम बुद्धिमत्ता (Artificial Intelligence या AI) कंप्यूटर विज्ञान की वह शाखा है जो मशीनों को सोचने, समझने और सीखने की क्षमता देती है। भारत में एआई का उपयोग कृषि, स्वास्थ्य, डिजिटल सार्वजनिक बुनियादी ढांचे और शिक्षा में तेजी से बढ़ रहा है।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "technology" }
   },
   {
     "id": "msmarco_hi_003",
-    "text": "योग एक प्राचीन भारतीय जीवन शैली और व्यायाम प्रणाली है। यह शरीर, मन और आत्मा को संतुलित करने में मदद करता है। अंतर्राष्ट्रीय योग दिवस हर साल २१ जून को मनाया जाता है।",
+    "text": "योग एक प्राचीन भारतीय शारीरिक, मानसिक और आध्यात्मिक अभ्यास है। यह शरीर और मन को स्वस्थ रखता है। संयुक्त राष्ट्र महासभा द्वारा २१ जून को अंतर्राष्ट्रीय योग दिवस (International Yoga Day) के रूप में घोषित किया गया है।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "health" }
   },
   {
     "id": "msmarco_hi_004",
-    "text": "सौर ऊर्जा नवीकरणीय ऊर्जा का एक प्रमुख स्रोत है। सूर्य से प्राप्त प्रकाश और ऊष्मा को फोटोवोल्टिक कोशिकाओं की मदद से बिजली में परिवर्तित किया जाता है। यह पर्यावरण के अनुकूल है।",
+    "text": "सौर ऊर्जा सूर्य से प्राप्त ऊर्जा है जिसे सोलर पैनल (फोटोवोल्टिक सेल) द्वारा बिजली में परिवर्तित किया जाता है। भारत अंतर्राष्ट्रीय सौर गठबंधन (ISA) का संस्थापक सदस्य है और राष्ट्रीय सौर मिशन के तहत हरित ऊर्जा का विस्तार कर रहा है।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "science" }
   },
   {
     "id": "msmarco_hi_005",
-    "text": "हिमालय दुनिया की सबसे ऊंची पर्वत श्रृंखला है। यह दक्षिण एशिया में स्थित है और भारत, नेपाल, भूटान, चीन और पाकिस्तान में फैली हुई है। माउंट एवरेस्ट इसकी सबसे ऊंची चोटी है।",
+    "text": "हिमालय पर्वतमाला दुनिया की सबसे ऊंची पर्वत श्रृंखला है जो भारत के उत्तरी भाग में स्थित है। माउंट एवरेस्ट (८,८४८.८६ मीटर) हिमालय की और विश्व की सबसे ऊंची चोटी है, जबकि भारत में कंचनजंगा सबसे ऊंची चोटी है।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "geography" }
   },
   {
     "id": "msmarco_hi_006",
-    "text": "महात्मा गांधी भारत के स्वतंत्रता संग्राम के प्रमुख नेता थे। उन्हें 'राष्ट्रपिता' के नाम से जाना जाता है। उन्होंने अहिंसा और सत्य के सिद्धांतों पर जोर दिया।",
+    "text": "महात्मा गांधी भारत के स्वतंत्रता संग्राम के महानायक थे। उन्हें 'राष्ट्रपिता' और बापू कहा जाता है। उन्होंने सत्य और अहिंसा (Non-violence) के सिद्धांतों पर आधारित सत्याग्रह आंदोलन का नेतृत्व किया। उनका जन्म २ अक्टूबर १८६९ को पोरबंदर में हुआ था।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "history" }
   },
   {
     "id": "msmarco_hi_007",
-    "text": "डिजिटल इंडिया भारत सरकार की एक पहल है जिसका उद्देश्य देश को डिजिटल रूप से सशक्त समाज और ज्ञान अर्थव्यवस्था में बदलना है। इसमें इंटरनेट सेवाओं का विस्तार शामिल है।",
+    "text": "डिजिटल इंडिया कार्यक्रम २०१५ में शुरू किया गया था जिसका उद्देश्य भारत को ज्ञान आधारित डिजिटल अर्थव्यवस्था बनाना है। इसके तहत आधार (Aadhaar), प्रत्यक्ष लाभ अंतरण (DBT), डिजिलॉकर और डिजिटल साक्षरता का राष्ट्रव्यापी विस्तार हुआ है।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "government" }
   },
   {
     "id": "msmarco_hi_008",
-    "text": "जल संरक्षण अत्यंत महत्वपूर्ण है। पृथ्वी पर पीने योग्य पानी का अनुपात बहुत सीमित है। वर्षा जल संचयन तकनीक अपनाकर पानी की बर्बादी को रोका जा सकता है।",
+    "text": "एकीकृत भुगतान इंटरफेस (UPI - Unified Payments Interface) भारतीय राष्ट्रीय भुगतान निगम (NPCI) द्वारा विकसित एक त्वरित वास्तविक समय भुगतान प्रणाली है। यह मोबाइल फोन से बैंक खातों के बीच तुरंत धन हस्तांतरण की सुविधा प्रदान करता है।",
     "language": "hi",
-    "metadata": { "source": "msmarco-xi", "topic": "environment" }
+    "metadata": { "source": "msmarco-xi", "topic": "finance" }
   },
   {
     "id": "msmarco_hi_009",
-    "text": "अंतरिक्ष अनुसंधान संगठन (इसरो) भारत की राष्ट्रीय अंतरिक्ष एजेंसी है। चंद्रयान और मंगलयान मिशनों की सफलता ने भारत को अंतरिक्ष विज्ञान में वैश्विक पहचान दिलाई है।",
+    "text": "भारतीय अंतरिक्ष अनुसंधान संगठन (ISRO) की स्थापना १५ अगस्त १९६९ को हुई थी। इसका मुख्यालय बेंगलुरु में है। इसरो ने चंद्रयान-३ मिशन के तहत २३ अगस्त २०२३ को चंद्रमा के दक्षिणी ध्रुव पर सफल सॉफ्ट लैंडिंग कर इतिहास रचा, जिसे 'राष्ट्रीय अंतरिक्ष दिवस' घोषित किया गया।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "space" }
   },
   {
     "id": "msmarco_hi_010",
-    "text": "आयुर्वेद भारत की पारंपरिक चिकित्सा प्रणाली है जो ५००० वर्षों से अधिक पुरानी है। यह प्राकृतिक जड़ी-बूटियों और आहार नियंत्रण के माध्यम से रोगों के निवारण पर केंद्रित है।",
+    "text": "आयुर्वेद भारत की ५००० वर्ष पुरानी पारंपरिक समग्र चिकित्सा प्रणाली है। आयुर्वेद में वात, पित्त और कफ तीनों दोषों के संतुलन पर बल दिया जाता है और जड़ी-बूटियों, योग और उचित आहार के माध्यम से स्वास्थ्य सुधार किया जाता है।",
     "language": "hi",
     "metadata": { "source": "msmarco-xi", "topic": "health" }
+  },
+  {
+    "id": "msmarco_hi_011",
+    "text": "भारत का संविधान दुनिया का सबसे लंबा लिखित संविधान है। डॉ. भीमराव अंबेडकर को भारतीय संविधान का जनक माना जाता है। २६ जनवरी १९५० को संविधान लागू हुआ और भारत एक संप्रभु लोकतांत्रिक गणराज्य बना, जिसे गणतंत्र दिवस के रूप में मनाया जाता है।",
+    "language": "hi",
+    "metadata": { "source": "msmarco-xi", "topic": "civics" }
+  },
+  {
+    "id": "msmarco_hi_012",
+    "text": "गंगा नदी भारत की सबसे पवित्र और सबसे लंबी नदी है, जिसकी लंबाई लगभग २,५२५ किलोमीटर है। यह उत्तराखंड के गंगोत्री हिमनद से निकलती है और बंगाल की खाड़ी में सुंदरबन डेल्टा का निर्माण करते हुए विसर्जित होती है।",
+    "language": "hi",
+    "metadata": { "source": "msmarco-xi", "topic": "geography" }
+  },
+  {
+    "id": "msmarco_hi_013",
+    "text": "ताजमहल भारत के आगरा शहर में यमुना नदी के तट पर स्थित सफेद संगमरमर का एक विश्व प्रसिद्ध मकबरा है। इसे मुगल सम्राट शाहजहाँ ने अपनी पत्नी मुमताज महल की याद में बनवाया था। यह यूनेस्को की विश्व धरोहर स्थल और दुनिया के सात अजूबों में शामिल है।",
+    "language": "hi",
+    "metadata": { "source": "msmarco-xi", "topic": "culture" }
+  },
+  {
+    "id": "msmarco_hi_014",
+    "text": "भारत में २२ आधिकारिक भाषाएं संविधान की आठवीं अनुसूची में शामिल हैं। हिंदी देवनागरी लिपि में भारत संघ की आधिकारिक राजभाषा है, जबकि अंग्रेजी का उपयोग आधिकारिक कार्यों में सह-भाषा के रूप में किया जाता है।",
+    "language": "hi",
+    "metadata": { "source": "msmarco-xi", "topic": "culture" }
+  },
+  {
+    "id": "msmarco_hi_015",
+    "text": "भारत का राष्ट्रीय प्रतीक सारनाथ स्थित अशोक के सिंह स्तंभ से लिया गया है। भारत का राष्ट्रीय पशु बाघ (रॉयल बंगाल टाइगर), राष्ट्रीय पक्षी मोर, राष्ट्रीय पुष्प कमल और राष्ट्रीय वृक्ष बरगद है।",
+    "language": "hi",
+    "metadata": { "source": "msmarco-xi", "topic": "civics" }
+  },
+  {
+    "id": "msmarco_en_016",
+    "text": "India is the world's most populous country and the largest democracy. Located in South Asia, it is bordered by the Indian Ocean on the south, the Arabian Sea on the southwest, and the Bay of Bengal on the southeast.",
+    "language": "en",
+    "metadata": { "source": "msmarco-xi", "topic": "geography" }
+  },
+  {
+    "id": "msmarco_en_017",
+    "text": "Unified Payments Interface (UPI) is an instant real-time payment system developed by the National Payments Corporation of India (NPCI). It facilitates inter-bank peer-to-peer and person-to-merchant transactions seamlessly on mobile devices.",
+    "language": "en",
+    "metadata": { "source": "msmarco-xi", "topic": "finance" }
+  },
+  {
+    "id": "msmarco_en_018",
+    "text": "The Indian Space Research Organisation (ISRO) is the national space agency of India. On August 23, 2023, ISRO made history with Chandrayaan-3 by successfully landing near the lunar south pole.",
+    "language": "en",
+    "metadata": { "source": "msmarco-xi", "topic": "space" }
+  },
+  {
+    "id": "msmarco_en_019",
+    "text": "Retrieval-Augmented Generation (RAG) is an AI framework that retrieves external factual knowledge from a vector database to provide grounded, hallucination-free answers with verifiable citations.",
+    "language": "en",
+    "metadata": { "source": "msmarco-xi", "topic": "technology" }
+  },
+  {
+    "id": "msmarco_en_020",
+    "text": "New Delhi is the capital of India and the seat of all three branches of the Government of India. The Rashtrapati Bhavan, Parliament House, and Supreme Court are situated in New Delhi.",
+    "language": "en",
+    "metadata": { "source": "msmarco-xi", "topic": "geography" }
   }
 ]
