@@ -5,7 +5,7 @@ import { withTimeout } from "../timeout";
 import { HarnessContext, HarnessError, StageResult } from "../types";
 import { recordStageTiming } from "../trace";
 
-const RETRIEVE_TIMEOUT_PER_COLLECTION_MS = 1500;
+const RETRIEVE_TIMEOUT_PER_COLLECTION_MS = 4000;
 const TOP_K_PER_COLLECTION = 5;
 
 export interface RetrievalOutput {

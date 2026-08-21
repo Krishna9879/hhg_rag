@@ -10,11 +10,11 @@ import { RefusalBanner } from "@/components/RefusalBanner";
 import { DebugPanel } from "@/components/DebugPanel";
 
 const EXAMPLE_QUERIES = [
-  "भारत की राजधानी क्या है?",
-  "अंतर्राष्ट्रीय योग दिवस कब मनाया जाता है?",
-  "सौर ऊर्जा कैसे काम करती है?",
-  "डिजिटल इंडिया मिशन का उद्देश्य क्या है?",
-  "इसरो के प्रमुख मिशन कौन से हैं?",
+  { label: "भारत की राजधानी", query: "भारत की राजधानी क्या है?", tag: "भूगोल" },
+  { label: "योग दिवस", query: "अंतर्राष्ट्रीय योग दिवस कब मनाया जाता है?", tag: "स्वास्थ्य" },
+  { label: "सौर ऊर्जा", query: "सौर ऊर्जा कैसे काम करती है?", tag: "विज्ञान" },
+  { label: "डिजिटल इंडिया", query: "डिजिटल इंडिया मिशन का उद्देश्य क्या है?", tag: "योजनाएं" },
+  { label: "इसरो मिशन", query: "इसरो के प्रमुख मिशन कौन से हैं?", tag: "अंतरिक्ष" },
 ];
 
 export default function HomePage() {
@@ -34,6 +34,10 @@ export default function HomePage() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleTranscript = (transcriptText: string, sttMs: number, passedTraceId: string) => {
+    if (!transcriptText || !transcriptText.trim()) {
+      setStatus("idle");
+      return;
+    }
     setQuery(transcriptText);
     setTraceId(passedTraceId);
     setLatency((prev) => ({ ...prev, sttMs }));
@@ -98,51 +102,35 @@ export default function HomePage() {
 
         for (const block of lines) {
           if (!block.trim()) continue;
+          const eventLine = block.split("\n").find((l) => l.startsWith("event: "));
+          const dataLine = block.split("\n").find((l) => l.startsWith("data: "));
 
-          let eventType = "message";
-          let dataStr = "";
+          if (!dataLine) continue;
+          const eventType = eventLine ? eventLine.replace("event: ", "").trim() : "message";
+          const rawData = dataLine.replace("data: ", "").trim();
 
-          for (const line of block.split("\n")) {
-            if (line.startsWith("event: ")) {
-              eventType = line.replace("event: ", "").trim();
-            } else if (line.startsWith("data: ")) {
-              dataStr = line.replace("data: ", "").trim();
-            }
+          let parsed: any = {};
+          try {
+            parsed = JSON.parse(rawData);
+          } catch {
+            continue;
           }
-
-          if (!dataStr) continue;
-          const parsed = JSON.parse(dataStr);
 
           if (eventType === "guardrail") {
             if (parsed.status === "refused") {
               setStatus("refused");
               setGuardrailReason(parsed.reason);
               setRefusalMessage(parsed.message);
+              setIsStreaming(false);
             }
           } else if (eventType === "retrieval") {
-            if (parsed.chunks) {
-              setChunks(parsed.chunks);
-            }
-            if (parsed.retrievalLatencyMs) {
-              setLatency((prev) => ({
-                ...prev,
-                retrievalMs: parsed.retrievalLatencyMs,
-              }));
-            }
+            setChunks(parsed.chunks || []);
           } else if (eventType === "token") {
-            if (parsed.text) {
-              setAnswer((prev) => prev + parsed.text);
-            }
+            setAnswer((prev) => prev + (parsed.text || ""));
           } else if (eventType === "done") {
-            if (parsed.fullAnswer) {
-              setAnswer(parsed.fullAnswer);
-            }
-            if (parsed.latency) {
-              setLatency(parsed.latency);
-            }
-            if (parsed.traceId) {
-              setTraceId(parsed.traceId);
-            }
+            setAnswer(parsed.fullAnswer || "");
+            setLatency(parsed.latency);
+            setTraceId(parsed.traceId);
             setIsStreaming(false);
             if (status !== "refused") {
               setStatus("done");
@@ -157,9 +145,8 @@ export default function HomePage() {
         console.error("Query failed:", err);
         setStatus("error");
         setRefusalMessage((err as Error).message);
+        setIsStreaming(false);
       }
-    } finally {
-      setIsStreaming(false);
     }
   };
 
@@ -172,26 +159,33 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center py-8 px-4 sm:px-6">
-      <div className="w-full max-w-5xl flex flex-col gap-8">
+    <div className="min-h-[calc(100vh-4.5rem)] flex flex-col items-center py-10 px-4 sm:px-6">
+      <div className="w-full max-w-5xl flex flex-col gap-10">
         {/* Hero Section */}
-        <div className="text-center flex flex-col items-center gap-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+        <div className="text-center flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono shadow-sm">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Active Pipeline: Sarvam STT → Multi-Chunk Fusion → Groq LLM
+            <span>Indic Voice Pipeline: Sarvam STT → Multi-Chunk Fusion → Groq LPU</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-[#F5F7F6] tracking-tight">
-            High-Performance Indic Voice RAG
+
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white">
+            Sub-Second <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">Indic Voice RAG</span>
           </h1>
-          <p className="text-sm sm:text-base text-[#9AA6A2] max-w-2xl">
-            Ask any question in Hindi or English using voice or text. Answers are strictly grounded in the MSMARCO-XI dataset via 4 parallel vector chunking strategies with hard sub-second latency budgets.
+
+          <p className="text-sm sm:text-base text-[#9AA6A2] max-w-2xl font-sans leading-relaxed">
+            Ask any question in Hindi or English using voice or text. Grounded in the MSMARCO-XI dataset via 4 parallel vector chunking strategies with strict sub-second latency budgets.
           </p>
         </div>
 
-        {/* Input Interface */}
-        <div className="w-full flex flex-col items-center gap-6 bg-[#141A18]/60 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+        {/* Input Interface Card */}
+        <div className="w-full flex flex-col items-center gap-7 bg-gradient-to-b from-[#141A18]/90 to-[#0F1413]/90 border border-white/[0.08] rounded-3xl p-6 sm:p-9 shadow-2xl backdrop-blur-2xl relative overflow-hidden">
+          {/* Subtle Ambient Background Gradient */}
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-emerald-500/10 blur-3xl pointer-events-none rounded-full" />
+
+          {/* Voice Microphone Controller */}
           <MicButton onTranscript={handleTranscript} disabled={isStreaming} />
 
+          {/* Text/Transcript Editor */}
           <TranscriptEditor
             query={query}
             onChange={setQuery}
@@ -200,28 +194,33 @@ export default function HomePage() {
           />
 
           {/* Quick Example Queries */}
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <span className="text-xs text-[#9AA6A2] font-mono mr-1">Try:</span>
+          <div className="w-full flex flex-wrap items-center justify-center gap-2 pt-1 border-t border-white/5">
+            <span className="text-xs text-[#9AA6A2]/70 font-mono mr-1 flex items-center gap-1">
+              <span>💡 Suggestions:</span>
+            </span>
             {EXAMPLE_QUERIES.map((example, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => {
-                  setQuery(example);
-                  handleQuerySubmit(example);
+                  setQuery(example.query);
+                  handleQuerySubmit(example.query);
                 }}
                 disabled={isStreaming}
-                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-[#9AA6A2] hover:text-[#F5F7F6] border border-white/5 hover:border-white/15 transition-all cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-emerald-500/10 text-xs text-[#9AA6A2] hover:text-emerald-300 border border-white/[0.08] hover:border-emerald-500/30 transition-all duration-200 cursor-pointer disabled:opacity-40"
               >
-                {example}
+                <span className="text-[10px] font-mono text-[#9AA6A2]/50 bg-black/30 px-1 py-0.5 rounded">
+                  {example.tag}
+                </span>
+                <span>{example.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Latency Telemetry Chips */}
+        {/* Latency Telemetry Panel */}
         {latency && (
-          <div className="w-full">
+          <div className="w-full animate-fade-in">
             <LatencyChips latency={latency} traceId={traceId} />
           </div>
         )}
@@ -233,14 +232,17 @@ export default function HomePage() {
 
         {/* Error State */}
         {status === "error" && (
-          <div className="w-full rounded-2xl bg-red-950/40 border border-red-500/30 p-5 text-red-200 text-sm">
-            <strong>Error:</strong> {refusalMessage || "Something went wrong while processing your request."}
+          <div className="w-full rounded-2xl bg-red-950/60 border border-red-500/40 p-5 text-red-200 text-sm font-sans flex items-center gap-3">
+            <svg className="w-5 h-5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>{refusalMessage || "Something went wrong while processing your request."}</span>
           </div>
         )}
 
-        {/* Main Content Grid: Answer on Left, Sources on Right */}
+        {/* Main Content Grid: Answer on Left (7 cols), Sources on Right (5 cols) */}
         {(answer || isStreaming || chunks.length > 0) && status !== "refused" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-start">
             {/* Answer Column */}
             <div className="lg:col-span-7 flex flex-col gap-4">
               <AnswerStream
@@ -251,19 +253,20 @@ export default function HomePage() {
             </div>
 
             {/* Retrieved Sources Column */}
-            <div className="lg:col-span-5 flex flex-col gap-4">
-              <div className="flex items-center justify-between">
+            <div className="lg:col-span-5 flex flex-col gap-4 bg-[#141A18]/60 border border-white/[0.08] rounded-3xl p-5 backdrop-blur-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-medium text-[#9AA6A2] uppercase tracking-wider">
+                  <div className="w-2 h-2 rounded-full bg-teal-400" />
+                  <span className="text-xs font-mono font-bold text-[#F5F7F6] uppercase tracking-wider">
                     Retrieved Context ({chunks.length})
                   </span>
                 </div>
-                <span className="text-[11px] font-mono text-[#9AA6A2]/70">
-                  Fused via RRF
+                <span className="text-[11px] font-mono text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  RRF Rank Fusion
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3 max-h-[480px] overflow-y-auto pr-1">
+              <div className="flex flex-col gap-3 max-h-[520px] overflow-y-auto pr-1">
                 {chunks.map((chunk, idx) => (
                   <SourceCard
                     key={idx}

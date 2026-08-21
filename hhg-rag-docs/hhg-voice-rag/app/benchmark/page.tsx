@@ -83,16 +83,20 @@ export default function BenchmarkPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center py-10 px-4 sm:px-6">
+    <div className="min-h-[calc(100vh-4.5rem)] flex flex-col items-center py-10 px-4 sm:px-6">
       <div className="w-full max-w-5xl flex flex-col gap-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
           <div>
-            <h1 className="text-2xl sm:text-4xl font-black text-[#F5F7F6] tracking-tight">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono mb-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Real-Time Latency Intelligence</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
               Latency Benchmark & Telemetry
             </h1>
             <p className="text-sm text-[#9AA6A2] font-sans mt-1">
-              Real-time P50 / P70 / P100 percentile distributions across RAG pipeline stages.
+              Live P50 / P70 / P100 percentile distributions across all RAG pipeline stages.
             </p>
           </div>
 
@@ -101,7 +105,7 @@ export default function BenchmarkPage() {
             type="button"
             onClick={handleRunBenchmark}
             disabled={isRunning}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-emerald-600/30 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-emerald-600/30 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95 shrink-0"
           >
             {isRunning ? (
               <>
@@ -125,9 +129,9 @@ export default function BenchmarkPage() {
 
         {/* Progress Bar when running */}
         {isRunning && jobProgress && (
-          <div className="w-full bg-[#141A18] border border-white/10 rounded-2xl p-5 flex flex-col gap-2 shadow-lg animate-pulse">
+          <div className="w-full bg-[#141A18]/90 border border-white/[0.08] rounded-2xl p-5 flex flex-col gap-2 shadow-lg animate-pulse backdrop-blur-xl">
             <div className="flex items-center justify-between text-xs font-mono text-[#9AA6A2]">
-              <span>Running automated evaluation against 50 queries...</span>
+              <span>Running automated evaluation against 50 evaluation queries...</span>
               <span className="text-emerald-400 font-bold">
                 {Math.round((jobProgress.completed / jobProgress.total) * 100)}%
               </span>
@@ -143,14 +147,14 @@ export default function BenchmarkPage() {
 
         {/* Download CSV Link */}
         {csvUrl && (
-          <div className="w-full bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+          <div className="w-full bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg backdrop-blur-xl">
             <span className="text-sm text-emerald-200">
               Benchmark complete! Results exported to <strong>{csvUrl}</strong>
             </span>
             <a
               href={csvUrl}
               download="benchmark-report.csv"
-              className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold rounded-lg transition-colors"
+              className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold rounded-lg transition-colors shadow"
             >
               Download CSV
             </a>
@@ -164,10 +168,10 @@ export default function BenchmarkPage() {
               key={s}
               type="button"
               onClick={() => setStage(s)}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer ${
                 stage === s
                   ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
-                  : "bg-[#141A18] text-[#9AA6A2] hover:text-white border border-white/10 hover:border-white/20"
+                  : "bg-[#141A18]/80 text-[#9AA6A2] hover:text-white border border-white/[0.08] hover:border-white/20"
               }`}
             >
               {s.toUpperCase()}
@@ -177,12 +181,13 @@ export default function BenchmarkPage() {
 
         {/* Latency Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="rounded-2xl bg-[#141A18] border border-white/10 p-6 shadow-xl flex flex-col gap-2">
-            <span className="text-xs font-mono font-medium text-emerald-400 uppercase tracking-wider">
+          <div className="rounded-3xl bg-[#141A18]/90 border border-white/[0.08] p-6 shadow-xl flex flex-col gap-2 backdrop-blur-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-emerald-500/40" />
+            <span className="text-xs font-mono font-semibold text-emerald-400 uppercase tracking-wider">
               P50 Latency (Median)
             </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl sm:text-5xl font-black font-mono text-[#F5F7F6]">
+              <span className="text-4xl sm:text-5xl font-black font-mono text-white">
                 {stats ? stats.p50Ms : "--"}
               </span>
               <span className="text-sm font-mono text-[#9AA6A2]">ms</span>
@@ -192,12 +197,13 @@ export default function BenchmarkPage() {
             </span>
           </div>
 
-          <div className="rounded-2xl bg-[#141A18] border border-white/10 p-6 shadow-xl flex flex-col gap-2">
-            <span className="text-xs font-mono font-medium text-amber-400 uppercase tracking-wider">
+          <div className="rounded-3xl bg-[#141A18]/90 border border-white/[0.08] p-6 shadow-xl flex flex-col gap-2 backdrop-blur-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-500/40" />
+            <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-wider">
               P70 Latency
             </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl sm:text-5xl font-black font-mono text-[#F5F7F6]">
+              <span className="text-4xl sm:text-5xl font-black font-mono text-white">
                 {stats ? stats.p70Ms : "--"}
               </span>
               <span className="text-sm font-mono text-[#9AA6A2]">ms</span>
@@ -207,26 +213,28 @@ export default function BenchmarkPage() {
             </span>
           </div>
 
-          <div className="rounded-2xl bg-[#141A18] border border-white/10 p-6 shadow-xl flex flex-col gap-2">
-            <span className="text-xs font-mono font-medium text-purple-400 uppercase tracking-wider">
-              P100 (Max / Worst-case)
+          <div className="rounded-3xl bg-[#141A18]/90 border border-white/[0.08] p-6 shadow-xl flex flex-col gap-2 backdrop-blur-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-purple-500/40" />
+            <span className="text-xs font-mono font-semibold text-purple-400 uppercase tracking-wider">
+              P100 (Max / Worst-Case)
             </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl sm:text-5xl font-black font-mono text-[#F5F7F6]">
+              <span className="text-4xl sm:text-5xl font-black font-mono text-white">
                 {stats ? stats.p100Ms : "--"}
               </span>
               <span className="text-sm font-mono text-[#9AA6A2]">ms</span>
             </div>
             <span className="text-xs text-[#9AA6A2]/70 font-mono mt-1">
-              Maximum observed latency in current sample window
+              Maximum observed latency in window
             </span>
           </div>
         </div>
 
         {/* Target Latency Budgets Table */}
-        <div className="rounded-2xl bg-[#141A18] border border-white/10 p-6 shadow-xl flex flex-col gap-4">
-          <h2 className="text-lg font-bold text-[#F5F7F6]">
-            Architectural Latency Budgets vs SLA
+        <div className="rounded-3xl bg-[#141A18]/90 border border-white/[0.08] p-6 sm:p-8 shadow-xl flex flex-col gap-4 backdrop-blur-xl">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <span>Architectural Latency Budgets vs SLA</span>
           </h2>
 
           <div className="overflow-x-auto">
@@ -242,33 +250,33 @@ export default function BenchmarkPage() {
               <tbody className="divide-y divide-white/5">
                 <tr>
                   <td className="py-3 text-white font-medium">STT (Sarvam AI)</td>
-                  <td className="py-3 text-amber-400">5000ms</td>
+                  <td className="py-3 text-amber-400 font-semibold">5000ms</td>
                   <td className="py-3">1 retry (backoff [0, 150ms])</td>
                   <td className="py-3">Manual text prompt fallback</td>
                 </tr>
                 <tr>
                   <td className="py-3 text-white font-medium">Embedding (Jina / E5)</td>
-                  <td className="py-3 text-blue-400">2000ms</td>
+                  <td className="py-3 text-blue-400 font-semibold">2000ms</td>
                   <td className="py-3">1 retry</td>
-                  <td className="py-3">Cancel network call cleanly via AbortSignal</td>
+                  <td className="py-3">Clean AbortSignal cancellation</td>
                 </tr>
                 <tr>
                   <td className="py-3 text-white font-medium">Qdrant Vector Retrieval</td>
-                  <td className="py-3 text-purple-400">1500ms / collection</td>
-                  <td className="py-3">Parallel search across 4 collections</td>
+                  <td className="py-3 text-purple-400 font-semibold">4000ms</td>
+                  <td className="py-3">Parallel 4-collection search</td>
                   <td className="py-3">Proceed with surviving collections</td>
                 </tr>
                 <tr>
                   <td className="py-3 text-white font-medium">Fusion & Rerank (RRF)</td>
-                  <td className="py-3 text-teal-400">20ms</td>
+                  <td className="py-3 text-teal-400 font-semibold">20ms</td>
                   <td className="py-3">In-memory CPU execution</td>
                   <td className="py-3">Reciprocal Rank Fusion (K=60)</td>
                 </tr>
                 <tr>
                   <td className="py-3 text-white font-medium">LLM Generation (Groq)</td>
-                  <td className="py-3 text-emerald-400">2500ms</td>
+                  <td className="py-3 text-emerald-400 font-semibold">2500ms</td>
                   <td className="py-3">1 retry</td>
-                  <td className="py-3">Automatic model downgrade (70B → 8B / 20B)</td>
+                  <td className="py-3">Auto model downgrade (70B → 8B)</td>
                 </tr>
               </tbody>
             </table>

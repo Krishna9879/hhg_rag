@@ -37,6 +37,7 @@ function getClient(): QdrantClient {
     _client = new QdrantClient({
       url: env.QDRANT_URL,
       apiKey: env.QDRANT_API_KEY || undefined,
+      checkCompatibility: false,
     });
   }
   return _client;

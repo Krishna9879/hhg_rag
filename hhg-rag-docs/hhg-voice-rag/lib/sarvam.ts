@@ -63,19 +63,19 @@ export async function transcribe(
 
     const data = await response.json();
 
-    if (!data.transcript) {
+    if (data.transcript === undefined || data.transcript === null) {
       throw new HarnessError(
         "ValidationError",
-        "Sarvam response did not contain a transcript field",
+        "Sarvam response did not contain a valid transcript field",
         200,
         data
       );
     }
 
     return {
-      transcript: data.transcript,
+      transcript: typeof data.transcript === "string" ? data.transcript.trim() : "",
       confidence: typeof data.confidence === "number" ? data.confidence : 1.0,
-      language: data.language_code || "en-IN",
+      language: data.language_code || "hi-IN",
     };
   } catch (error) {
     if (error instanceof HarnessError) {
