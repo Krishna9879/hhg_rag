@@ -30,9 +30,11 @@ export async function runRetrieveStage(
 
   const resultsByStrategy: Record<string, QdrantSearchResult[]> = {};
   const missingStrategies: string[] = [];
+  const perStrategyMs: Record<string, number> = {};
 
-  // Search each collection concurrently with timeout and retry per collection
+  // Search each collection concurrently in true parallel (Promise.all)
   const searchPromises = strategies.map(async ({ name, collection }) => {
+    const stratStart = Date.now();
     try {
       const results = await withRetry(
         async () => {
@@ -50,8 +52,10 @@ export async function runRetrieveStage(
           retryOn: ["UpstreamTimeout", "UpstreamError"],
         }
       );
+      perStrategyMs[name] = Date.now() - stratStart;
       resultsByStrategy[name] = results;
     } catch (err) {
+      perStrategyMs[name] = Date.now() - stratStart;
       console.warn(`[Harness] Retrieval failed for strategy '${name}':`, (err as Error).message);
       missingStrategies.push(name);
       resultsByStrategy[name] = [];
@@ -62,6 +66,13 @@ export async function runRetrieveStage(
 
   const latencyMs = Date.now() - start;
   recordStageTiming(ctx, "retrieval", latencyMs);
+
+  console.log(
+    `[Retrieve Stage] Parallel results (${strategies.length - missingStrategies.length}/${strategies.length}): ` +
+    `fixed=${perStrategyMs.fixed ?? 0}ms, overlap=${perStrategyMs.overlap ?? 0}ms, ` +
+    `semantic=${perStrategyMs.semantic ?? 0}ms, structural=${perStrategyMs.structural ?? 0}ms ` +
+    `| Total parallel wall-clock=${latencyMs}ms`
+  );
 
   const successfulStrategiesCount = strategies.length - missingStrategies.length;
 

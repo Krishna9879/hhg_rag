@@ -43,9 +43,25 @@ function getClient(): QdrantClient {
   return _client;
 }
 
+// In-memory query vector cache (2-minute TTL)
+interface SearchCacheEntry {
+  results: QdrantSearchResult[];
+  expiresAt: number;
+}
+
+const searchCache = new Map<string, SearchCacheEntry>();
+const SEARCH_CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+
+function getVectorKey(collectionName: string, vector: number[], topK: number): string {
+  // Use first 8 + last 8 float values as a lightweight fingerprint
+  const head = vector.slice(0, 8).map((v) => v.toFixed(3)).join(",");
+  const tail = vector.slice(-8).map((v) => v.toFixed(3)).join(",");
+  return `${collectionName}:${topK}:${vector.length}:${head}:${tail}`;
+}
+
 /**
  * Searches a collection in Qdrant with a query vector.
- * Automatically handles SDK method name variations (query vs search).
+ * Includes in-memory caching and optimized HNSW search parameters (hnsw_ef: 64).
  */
 export async function search(
   collectionName: string,
@@ -54,7 +70,20 @@ export async function search(
   filters?: any,
   signal?: AbortSignal
 ): Promise<QdrantSearchResult[]> {
+  const cacheKey = getVectorKey(collectionName, vector, topK);
+  const now = Date.now();
+  const cached = searchCache.get(cacheKey);
+
+  if (cached && now < cached.expiresAt) {
+    return cached.results;
+  }
+
   const client = getClient();
+  const searchParams = {
+    hnsw_ef: 64,
+    exact: false,
+  };
+
   try {
     let points: any[] = [];
     
@@ -64,6 +93,7 @@ export async function search(
         query: vector,
         limit: topK,
         filter: filters,
+        params: searchParams,
         with_payload: true,
       }, { signal });
       points = response.points || [];
@@ -73,15 +103,28 @@ export async function search(
         vector: vector,
         limit: topK,
         filter: filters,
+        params: searchParams,
         with_payload: true,
       }, { signal });
     }
 
-    return points.map((p: any) => ({
+    const formatted: QdrantSearchResult[] = points.map((p: any) => ({
       id: p.id,
       score: p.score,
       payload: p.payload as QdrantPointPayload | undefined,
     }));
+
+    // Cache results
+    if (searchCache.size > 500) {
+      const firstKey = searchCache.keys().next().value;
+      if (firstKey) searchCache.delete(firstKey);
+    }
+    searchCache.set(cacheKey, {
+      results: formatted,
+      expiresAt: now + SEARCH_CACHE_TTL_MS,
+    });
+
+    return formatted;
   } catch (error) {
     const err = error as Error;
     if (err.name === "AbortError") {
