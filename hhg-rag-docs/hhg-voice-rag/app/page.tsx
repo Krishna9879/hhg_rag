@@ -91,6 +91,7 @@ export default function HomePage() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let localRefused = false;
 
       while (true) {
         const { value, done } = await reader.read();
@@ -116,8 +117,11 @@ export default function HomePage() {
             continue;
           }
 
+          console.log(`[SSE] event=${eventType}`, parsed);
+
           if (eventType === "guardrail") {
             if (parsed.status === "refused") {
+              localRefused = true;
               setStatus("refused");
               setGuardrailReason(parsed.reason);
               setRefusalMessage(parsed.message);
@@ -126,13 +130,18 @@ export default function HomePage() {
           } else if (eventType === "retrieval") {
             setChunks(parsed.chunks || []);
           } else if (eventType === "token") {
-            setAnswer((prev) => prev + (parsed.text || ""));
+            if (!localRefused) {
+              setAnswer((prev) => prev + (parsed.text || ""));
+            }
           } else if (eventType === "done") {
-            setAnswer(parsed.fullAnswer || "");
             setLatency(parsed.latency);
             setTraceId(parsed.traceId);
             setIsStreaming(false);
-            if (status !== "refused") {
+            if (!localRefused) {
+              // Only overwrite answer from done event if it's meaningful
+              if (parsed.fullAnswer) {
+                setAnswer(parsed.fullAnswer);
+              }
               setStatus("done");
             }
           } else if (eventType === "error") {

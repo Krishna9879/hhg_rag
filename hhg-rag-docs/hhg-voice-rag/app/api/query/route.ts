@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        console.log(`[/api/query] Starting pipeline for query: "${body.query.substring(0, 60)}..." traceId=${traceId}`);
         const pipeline = runPipelineStream(
           body.query,
           { traceId, sttMs: body.sttMs },
@@ -64,6 +65,17 @@ export async function POST(req: NextRequest) {
         );
 
         for await (const event of pipeline) {
+          if (event.type === "guardrail") {
+            console.log(`[/api/query] [${traceId}] GUARDRAIL:`, JSON.stringify(event.data));
+          } else if (event.type === "retrieval") {
+            const rd = event.data as any;
+            console.log(`[/api/query] [${traceId}] RETRIEVAL: ${rd.chunks?.length ?? 0} chunks, latency=${rd.retrievalLatencyMs}ms`);
+          } else if (event.type === "done") {
+            const dd = event.data as any;
+            console.log(`[/api/query] [${traceId}] DONE: totalMs=${dd.latency?.totalMs} answer="${(dd.fullAnswer || '').substring(0, 80)}..."`);
+          } else if (event.type === "error") {
+            console.log(`[/api/query] [${traceId}] ERROR:`, JSON.stringify(event.data));
+          }
           const sseChunk = `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`;
           controller.enqueue(encoder.encode(sseChunk));
         }

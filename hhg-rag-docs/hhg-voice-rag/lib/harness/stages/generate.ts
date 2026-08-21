@@ -6,7 +6,7 @@ import { withTimeout } from "../timeout";
 import { HarnessContext, HarnessError, StageResult } from "../types";
 import { recordStageTiming } from "../trace";
 
-const GENERATION_FIRST_TOKEN_TIMEOUT_MS = 2500; // Time budget for initial token / response
+const GENERATION_FIRST_TOKEN_TIMEOUT_MS = 5000; // Time budget for initial token / response
 
 export interface PromptPayload {
   systemPrompt: string;

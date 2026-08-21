@@ -4,7 +4,7 @@ import { withTimeout } from "../timeout";
 import { HarnessContext, HarnessError, StageResult } from "../types";
 import { recordStageTiming } from "../trace";
 
-const EMBED_TIMEOUT_MS = 2000;
+const EMBED_TIMEOUT_MS = 3000;
 
 export async function runEmbedStage(
   ctx: HarnessContext,
