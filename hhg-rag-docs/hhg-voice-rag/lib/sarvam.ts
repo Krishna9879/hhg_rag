@@ -29,8 +29,16 @@ export async function transcribe(
   }
 
   const formData = new FormData();
-  // Sarvam expects the file field
-  formData.append("file", audioBlob, "audio.wav");
+  // Normalize MIME type to standard audio/webm or audio/wav without codecs parameters
+  let mime = audioBlob.type ? audioBlob.type.split(";")[0].trim() : "audio/webm";
+  if (!mime || mime === "application/octet-stream") {
+    mime = "audio/webm";
+  }
+  const arrayBuffer = await audioBlob.arrayBuffer();
+  const cleanBlob = new Blob([arrayBuffer], { type: mime });
+  const filename = mime.includes("wav") ? "audio.wav" : mime.includes("mp4") ? "audio.mp4" : "audio.webm";
+
+  formData.append("file", cleanBlob, filename);
   formData.append("model", modelName);
 
   try {
