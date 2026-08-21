@@ -30,7 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen bg-[#0B0F0E] text-[#F5F7F6] antialiased selection:bg-emerald-500/30 selection:text-emerald-200 font-sans">
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#0B0F0E] text-[#F5F7F6] antialiased selection:bg-emerald-500/30 selection:text-emerald-200 font-sans"
+      >
         <Navbar />
         <main className="w-full">{children}</main>
       </body>

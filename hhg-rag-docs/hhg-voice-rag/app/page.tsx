@@ -187,7 +187,7 @@ export default function HomePage() {
         </div>
 
         {/* Input Interface Card */}
-        <div className="w-full flex flex-col items-center gap-7 bg-gradient-to-b from-[#141A18]/90 to-[#0F1413]/90 border border-white/[0.08] rounded-3xl p-6 sm:p-9 shadow-2xl backdrop-blur-2xl relative overflow-hidden">
+        <div className="w-full flex flex-col items-center gap-6 sm:gap-7 bg-gradient-to-b from-[#141A18]/90 to-[#0F1413]/90 border border-white/[0.08] rounded-3xl p-4 sm:p-8 shadow-2xl backdrop-blur-2xl relative overflow-hidden">
           {/* Subtle Ambient Background Gradient */}
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-emerald-500/10 blur-3xl pointer-events-none rounded-full" />
 
