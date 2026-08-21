@@ -12,7 +12,7 @@ interface OverlapOpts {
  */
 export function chunkOverlap(
   text: string,
-  docId: string,
+  docId: string = "doc_0",
   opts?: OverlapOpts
 ): Chunk[] {
   const chunkSize = opts?.chunkSize || 256;

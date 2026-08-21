@@ -1,12 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { embed } from '../lib/embeddings';
-import { qdrantClient } from '../lib/qdrant';
+import { createCollectionIfNotExists, upsertBatch, QdrantPointPayload } from '../lib/qdrant';
 import { chunkFixed } from '../lib/chunking/fixed';
 import { chunkOverlap } from '../lib/chunking/overlap';
 import { chunkSemantic } from '../lib/chunking/semantic';
 import { chunkStructural } from '../lib/chunking/structural';
-import { Chunk } from '../lib/chunking/types';
 
 // Load environment to ensure QDRANT_URL, QDRANT_API_KEY, SARVAM_API_KEY exist
 import '../lib/env';
@@ -14,18 +13,7 @@ import '../lib/env';
 const DATA_PATH = path.join(process.cwd(), 'data', 'sample-passages.json');
 const REPORT_PATH = path.join(process.cwd(), 'data', 'ingest-report.json');
 
-const BATCH_SIZE = 64; // Respect embedding rate limits
-
-// Schema from docs 06
-interface Payload {
-  source_id: string; // Original MSMARCO-XI passage ID
-  chunk_id: string; // Unique ID for this chunk
-  text: string; // The chunked text
-  chunk_index: number;
-  total_chunks: number;
-  chunking_strategy: 'fixed' | 'overlap' | 'semantic' | 'structural';
-  metadata: Record<string, any>; // Includes original passage metadata
-}
+const BATCH_SIZE = 32;
 
 interface Passage {
   id: string;
@@ -35,7 +23,7 @@ interface Passage {
 }
 
 async function ingest() {
-  console.log('Starting ingestion pipeline...');
+  console.log('🚀 Starting ingestion pipeline...');
   const startTime = Date.now();
   
   if (!fs.existsSync(DATA_PATH)) {
@@ -46,7 +34,6 @@ async function ingest() {
   const passages: Passage[] = JSON.parse(rawData);
   console.log(`Loaded ${passages.length} passages for ingestion.`);
 
-  // If a limit is provided via arguments (e.g. --limit=100)
   let limit = passages.length;
   const limitArg = process.argv.find(arg => arg.startsWith('--limit='));
   if (limitArg) {
@@ -71,8 +58,15 @@ async function ingest() {
   ] as const;
 
   for (const strategy of strategies) {
-    console.log(`\nProcessing strategy: ${strategy.name}`);
-    const allPayloads: Payload[] = [];
+    console.log(`\n📦 Initializing collection: ${strategy.collection}`);
+    await createCollectionIfNotExists(strategy.collection, 1024);
+
+    console.log(`Processing strategy: ${strategy.name}`);
+    const allPayloads: Array<{
+      id: string;
+      text: string;
+      payload: QdrantPointPayload;
+    }> = [];
 
     // 1. Chunking
     for (const passage of subset) {
@@ -82,13 +76,21 @@ async function ingest() {
         
         chunks.forEach((chunk, index) => {
           allPayloads.push({
-            source_id: passage.id,
-            chunk_id: `${passage.id}_${strategy.name}_${index}`,
+            id: crypto.randomUUID(),
             text: chunk.text,
-            chunk_index: index,
-            total_chunks: chunks.length,
-            chunking_strategy: strategy.name as any,
-            metadata: passage.metadata || {}
+            payload: {
+              docId: passage.id,
+              strategy: strategy.name,
+              chunkIndex: index,
+              text: chunk.text,
+              tokenCount: chunk.tokenCount,
+              queryType: "other",
+              isSelected: true,
+              sourceDataset: "msmarco-xi",
+              createdAt: new Date().toISOString(),
+              overlapWith: (chunk as any).overlapWith,
+              breakpointScore: (chunk as any).breakpointScore,
+            }
           });
         });
       } catch (err: any) {
@@ -104,37 +106,17 @@ async function ingest() {
       const batchPayloads = allPayloads.slice(i, i + BATCH_SIZE);
       const batchTexts = batchPayloads.map(p => p.text);
       
-      console.log(`[${strategy.name}] Embedding batch ${i} to ${i + batchPayloads.length}...`);
+      console.log(`[${strategy.name}] Embedding batch ${i + 1} to ${i + batchPayloads.length} of ${allPayloads.length}...`);
       try {
-        const embeddings = await embed(batchTexts);
+        const embeddings = await embed(batchTexts, 'passage');
 
-        const points = batchPayloads.map((payload, idx) => ({
-          id: idx + i + 1, // Qdrant requires unique IDs, we use unsigned int for simplicity or UUID. We'll use a hash or simple index.
-          // Wait, Qdrant ID should ideally be a UUID. Let's create a deterministic UUID or just use random UUID.
-          // For simplicity in this script, we'll use a random UUID.
-          id: crypto.randomUUID(), 
+        const points = batchPayloads.map((item, idx) => ({
+          id: item.id,
           vector: embeddings[idx],
-          payload: payload
+          payload: item.payload
         }));
 
-        const isQueryFn = typeof (qdrantClient as any).query === 'function';
-        // Check Qdrant collections logic
-        // We assume the collections exist (they should be created by setup or we create them on the fly)
-        // Wait, the API spec says collections exist, but let's just upsert
-        if (typeof qdrantClient.upsert === 'function') {
-           await qdrantClient.upsert(strategy.collection, {
-              wait: true,
-              points: points
-           });
-        } else {
-            // Fallback for older SDK
-            // Any specific logic for older sdk goes here
-             await (qdrantClient as any).upsert(strategy.collection, {
-              wait: true,
-              points: points
-           });
-        }
-
+        await upsertBatch(strategy.collection, points);
         report.collections_upserted += points.length;
       } catch (err: any) {
         console.error(`Failed to embed/upsert batch for ${strategy.name}:`, err);
@@ -145,7 +127,7 @@ async function ingest() {
 
   report.timing_ms = Date.now() - startTime;
   fs.writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2));
-  console.log('\nIngestion complete!');
+  console.log('\n✅ Ingestion complete!');
   console.log(`Report saved to ${REPORT_PATH}`);
   console.log(JSON.stringify(report, null, 2));
 }

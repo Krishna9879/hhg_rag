@@ -3,6 +3,7 @@ import { getEnv } from "./env";
 import { HarnessError } from "./harness/types";
 
 export interface QdrantPointPayload {
+  [key: string]: unknown;
   docId: string;
   strategy: "fixed" | "overlap" | "semantic" | "structural";
   chunkIndex: number;

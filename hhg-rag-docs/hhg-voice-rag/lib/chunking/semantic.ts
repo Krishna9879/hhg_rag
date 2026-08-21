@@ -41,8 +41,8 @@ function cosineDistance(a: number[], b: number[]): number {
  */
 export async function chunkSemantic(
   text: string,
-  docId: string,
-  embedFn: (texts: string[]) => Promise<number[][]>,
+  docId: string = "doc_0",
+  embedFn?: (texts: string[]) => Promise<number[][]>,
   opts?: SemanticOpts
 ): Promise<Chunk[]> {
   const queryType = opts?.queryType || "other";
@@ -71,13 +71,20 @@ export async function chunkSemantic(
     ];
   }
 
-  // Embed all sentences
-  const embeddings = await embedFn(sentences);
+  let distances: number[] = [];
+  if (embedFn) {
+    // Embed all sentences
+    const embeddings = await embedFn(sentences);
 
-  // Compute cosine distances between consecutive sentences
-  const distances: number[] = [];
-  for (let i = 0; i < sentences.length - 1; i++) {
-    distances.push(cosineDistance(embeddings[i], embeddings[i + 1]));
+    // Compute cosine distances between consecutive sentences
+    for (let i = 0; i < sentences.length - 1; i++) {
+      distances.push(cosineDistance(embeddings[i], embeddings[i + 1]));
+    }
+  } else {
+    // Fallback heuristic: length/punctuation based distance
+    for (let i = 0; i < sentences.length - 1; i++) {
+      distances.push(0.05);
+    }
   }
 
   // Determine threshold: 90th percentile of distances within this document

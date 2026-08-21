@@ -12,13 +12,12 @@ import { HarnessError } from "./harness/types";
  */
 export async function embed(
   texts: string[],
-  type: "query" | "passage",
+  type: "query" | "passage" = "passage",
   signal?: AbortSignal
 ): Promise<number[][]> {
   const env = getEnv();
-  const model = env.EMBEDDING_MODEL || "intfloat/multilingual-e5-large";
+  const model = env.EMBEDDING_MODEL || "jina-embeddings-v3";
   
-  // Default to standard HuggingFace Inference API if URL is not provided
   let apiUrl = env.EMBEDDING_API_URL;
   if (!apiUrl) {
     apiUrl = `https://api-inference.huggingface.co/models/${model}`;
@@ -30,14 +29,33 @@ export async function embed(
     return [];
   }
 
-  // Prefix texts for E5 compatibility
-  const prefixedTexts = texts.map((t) => {
-    // Avoid double prefixing if it's already prefixed
-    if (t.startsWith("query: ") || t.startsWith("passage: ")) {
-      return t;
-    }
-    return `${type}: ${t}`;
-  });
+  const isJina = apiUrl.includes("jina.ai");
+  const isHF = apiUrl.includes("huggingface.co");
+
+  // Format request payload based on provider
+  let requestBody: any;
+  if (isJina) {
+    requestBody = {
+      model: model.includes("jina") ? model : "jina-embeddings-v3",
+      task: type === "query" ? "retrieval.query" : "retrieval.passage",
+      input: texts,
+    };
+  } else if (isHF) {
+    // Prefix texts for E5 / HF models compatibility
+    const prefixedTexts = texts.map((t) => {
+      if (t.startsWith("query: ") || t.startsWith("passage: ")) {
+        return t;
+      }
+      return `${type}: ${t}`;
+    });
+    requestBody = { inputs: prefixedTexts };
+  } else {
+    // Standard OpenAI compatible format
+    requestBody = {
+      model,
+      input: texts,
+    };
+  }
 
   try {
     const headers: Record<string, string> = {
@@ -50,7 +68,7 @@ export async function embed(
     const response = await fetch(apiUrl, {
       method: "POST",
       headers,
-      body: JSON.stringify({ inputs: prefixedTexts }),
+      body: JSON.stringify(requestBody),
       signal,
     });
 
@@ -66,62 +84,40 @@ export async function embed(
 
     const data = await response.json();
 
-    // The response from HF feature-extraction can sometimes be a nested 3D array [[[float]]] if it returns token-level embeddings,
-    // or a 2D array [[float]] if it does pooling.
-    // For standard feature-extraction on sentence transformers, HF returns 2D [[float]].
-    // Let's validate the return type.
-    if (!Array.isArray(data)) {
-      throw new HarnessError(
-        "ValidationError",
-        "Embedding response is not a valid JSON array",
-        200,
-        data
-      );
+    // 1. Check for Jina / OpenAI standard format ({ data: [{ embedding: [...] }] })
+    if (data && Array.isArray(data.data)) {
+      const sorted = [...data.data].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+      return sorted.map((d: any) => d.embedding);
     }
 
-    // Check if the response contains any error messages from Hugging Face
-    if ("error" in data) {
-      throw new HarnessError(
-        "UpstreamError",
-        `Hugging Face API returned error: ${(data as any).error}`,
-        200,
-        data
-      );
-    }
-
-    // In some cases, HF Inference API returns a raw list of numbers if inputs had length 1, 
-    // but usually it mirrors the batch dimension. Let's make sure it's a 2D array.
-    const result: number[][] = [];
-    for (const item of data) {
-      if (Array.isArray(item)) {
-        if (typeof item[0] === "number") {
-          result.push(item as number[]);
-        } else if (Array.isArray(item[0])) {
-          // If 3D array (token embeddings instead of pooled sentence embedding),
-          // we can average pool them as a fallback.
-          // Usually E5 models on HF feature-extraction returns the pooled 2D array.
-          const pooled = (item as number[][]).reduce((acc, tokenVec) => {
-            return acc.map((val, idx) => val + tokenVec[idx]);
-          }, new Array((item[0] as number[]).length).fill(0))
-          .map((sum) => sum / item.length);
-          result.push(pooled);
+    // 2. Check for HF direct array format
+    if (Array.isArray(data)) {
+      const result: number[][] = [];
+      for (const item of data) {
+        if (Array.isArray(item)) {
+          if (typeof item[0] === "number") {
+            result.push(item as number[]);
+          } else if (Array.isArray(item[0])) {
+            // Token pooling fallback
+            const pooled = (item as number[][]).reduce((acc, tokenVec) => {
+              return acc.map((val, idx) => val + tokenVec[idx]);
+            }, new Array((item[0] as number[]).length).fill(0))
+            .map((sum) => sum / item.length);
+            result.push(pooled);
+          }
+        } else if (typeof item === "number") {
+          return [data as number[]];
         }
-      } else if (typeof item === "number") {
-        // Single text was sent, HF returned 1D array directly (rare but possible depending on endpoint config)
-        return [data as number[]];
       }
+      return result;
     }
 
-    if (result.length !== texts.length) {
-      throw new HarnessError(
-        "ValidationError",
-        `Expected ${texts.length} embeddings, got ${result.length}`,
-        200,
-        data
-      );
-    }
-
-    return result;
+    throw new HarnessError(
+      "ValidationError",
+      "Embedding response is in an unexpected format",
+      200,
+      data
+    );
   } catch (error) {
     if (error instanceof HarnessError) {
       throw error;

@@ -11,7 +11,7 @@ interface FixedOpts {
  */
 export function chunkFixed(
   text: string,
-  docId: string,
+  docId: string = "doc_0",
   opts?: FixedOpts
 ): Chunk[] {
   const chunkSize = opts?.chunkSize || 256;

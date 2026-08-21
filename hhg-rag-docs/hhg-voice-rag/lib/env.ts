@@ -1,9 +1,14 @@
 import { z } from "zod";
+import { loadEnvConfig } from "@next/env";
 
-/**
- * Centralized environment variable access with Zod validation.
- * Server-only — never import this in client components.
- */
+// Automatically load .env, .env.local if running in standalone scripts
+if (typeof process !== "undefined" && process.cwd) {
+  try {
+    loadEnvConfig(process.cwd());
+  } catch (e) {
+    // Ignore if not applicable
+  }
+}
 const envSchema = z.object({
   // STT
   SARVAM_API_KEY: z.string().min(1, "SARVAM_API_KEY is required"),
@@ -21,8 +26,8 @@ const envSchema = z.object({
 
   // LLM
   GROQ_API_KEY: z.string().min(1, "GROQ_API_KEY is required"),
-  GROQ_MODEL_PRIMARY: z.string().default("llama-3.3-70b-versatile"),
-  GROQ_MODEL_FALLBACK: z.string().default("llama-3.1-8b-instant"),
+  GROQ_MODEL_PRIMARY: z.string().default("qwen/qwen3.6-27b"),
+  GROQ_MODEL_FALLBACK: z.string().default("openai/gpt-oss-20b"),
 
   // Dataset
   HF_TOKEN: z.string().default(""),

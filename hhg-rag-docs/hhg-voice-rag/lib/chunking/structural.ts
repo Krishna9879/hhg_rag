@@ -14,7 +14,7 @@ interface StructuralOpts {
  */
 export function chunkStructural(
   text: string,
-  docId: string,
+  docId: string = "doc_0",
   opts?: StructuralOpts
 ): Chunk[] {
   const queryType = opts?.queryType || "other";
