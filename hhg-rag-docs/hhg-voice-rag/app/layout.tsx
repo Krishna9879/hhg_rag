@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Navbar } from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Voice RAG — Grounded Q&A | HH Goa 2026",
+  title: "HHG Voice RAG — High-Performance Indic Grounded Q&A",
   description:
-    "Ask a question by voice, get a grounded, cited answer from MSMARCO-XI. " +
-    "Powered by Sarvam AI STT, multilingual-e5 embeddings, Qdrant vector search, and Groq LLM.",
-  keywords: ["RAG", "voice", "MSMARCO", "Sarvam", "Groq", "Qdrant", "HH Goa"],
+    "Ask a question by voice or text, get a strictly grounded, cited answer from MSMARCO-XI Indic dataset. " +
+    "Engineered with Sarvam AI STT, 4-strategy Vector Chunking, Qdrant, and Groq ultra-fast LLM.",
+  keywords: ["RAG", "voice", "Indic", "Hindi", "MSMARCO", "Sarvam", "Groq", "Qdrant", "HHG"],
 };
 
 export default function RootLayout({
@@ -15,9 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        {children}
+    <html lang="en" className="dark">
+      <body className="min-h-screen bg-[#0B0F0E] text-[#F5F7F6] antialiased selection:bg-emerald-500/30 selection:text-emerald-200 font-sans">
+        <Navbar />
+        <main className="w-full">{children}</main>
       </body>
     </html>
   );
