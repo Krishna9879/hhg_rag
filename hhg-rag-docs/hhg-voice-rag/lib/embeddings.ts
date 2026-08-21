@@ -1,5 +1,14 @@
+import https from "https";
 import { getEnv } from "./env";
 import { HarnessError } from "./harness/types";
+
+// Persistent Keep-Alive HTTPS Agent to reuse TLS connections across requests
+const persistentHttpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 25,
+  maxFreeSockets: 10,
+  timeout: 30000,
+});
 
 // In-memory LRU/TTL Embedding Cache (5-minute TTL, max 500 entries)
 interface CacheEntry {
@@ -116,10 +125,11 @@ export async function embed(
     }
 
     const httpStart = Date.now();
-    const response = await fetch(apiUrl, {
+    const response = await (fetch as any)(apiUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
+      agent: persistentHttpsAgent,
       signal,
     });
     const httpMs = Date.now() - httpStart;

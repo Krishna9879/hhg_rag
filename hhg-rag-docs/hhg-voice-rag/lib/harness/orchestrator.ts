@@ -7,6 +7,37 @@ import { runPreCheckGuardrail } from "../guardrails/preCheck";
 import { runGroundednessGuardrail } from "../guardrails/groundedness";
 import { runPostCheckGuardrail } from "../guardrails/postCheck";
 import { HarnessContext, PipelineResult } from "./types";
+import { embed } from "../embeddings";
+import { search } from "../qdrant";
+
+let _warmedUp = false;
+
+/**
+ * One-time background connection warm-up routine.
+ * Pre-establishes DNS resolution and TLS handshakes to Jina and Qdrant
+ * so initial user queries execute against already-warm sockets.
+ */
+export async function warmupConnections(): Promise<void> {
+  if (_warmedUp) return;
+  _warmedUp = true;
+  try {
+    const dummyVector = new Array(1024).fill(0.001);
+    await Promise.allSettled([
+      embed(["warmup"], "query"),
+      search("msmarco_fixed", dummyVector, 1),
+    ]);
+    console.log("[Warmup] TLS sockets pre-warmed for Embedding API & Qdrant Cloud.");
+  } catch (err) {
+    console.warn("[Warmup] Connection warmup completed with notice:", (err as Error).message);
+  }
+}
+
+// Trigger warmup on module import
+if (typeof process !== "undefined" && process.env.NODE_ENV !== "test") {
+  setTimeout(() => {
+    warmupConnections().catch(() => {});
+  }, 50);
+}
 
 export interface PipelineOptions {
   traceId?: string;
