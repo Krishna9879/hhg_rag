@@ -20,8 +20,12 @@ const embeddingCache = new Map<string, CacheEntry>();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 const MAX_CACHE_SIZE = 2000;
 
+function normalizeText(text: string): string {
+  return text.trim().toLowerCase().replace(/[.,?!।|]/g, "").replace(/\s+/g, " ");
+}
+
 function getCacheKey(model: string, type: string, text: string): string {
-  return `${model}:${type}:${text.trim().toLowerCase()}`;
+  return `${model}:${type}:${normalizeText(text)}`;
 }
 
 function cleanExpiredCache() {
@@ -36,7 +40,7 @@ function cleanExpiredCache() {
 /**
  * Embeds an array of texts using the configured embedding model.
  * Automatically prefixes text with 'query: ' or 'passage: ' as required by E5 models.
- * Includes in-memory caching (TTL 5 min) and fine-grained raw HTTP timing.
+ * Includes in-memory caching (TTL 1 hour) and fine-grained raw HTTP timing.
  * 
  * @param texts - Array of strings to embed.
  * @param type - Whether the texts are queries or passages (for E5 prefixing).
@@ -96,6 +100,8 @@ export async function embed(
     requestBody = {
       model: model.includes("jina") ? model : "jina-embeddings-v3",
       task: type === "query" ? "retrieval.query" : "retrieval.passage",
+      dimensions: 1024,
+      embedding_type: "float",
       input: uncachedTexts,
     };
   } else if (isHF) {
