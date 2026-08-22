@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getEnvSafe } from "@/lib/env";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
