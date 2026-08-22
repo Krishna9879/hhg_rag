@@ -43,14 +43,14 @@ function getClient(): QdrantClient {
   return _client;
 }
 
-// In-memory query vector cache (2-minute TTL)
+// In-memory query vector cache (1-hour TTL)
 interface SearchCacheEntry {
   results: QdrantSearchResult[];
   expiresAt: number;
 }
 
 const searchCache = new Map<string, SearchCacheEntry>();
-const SEARCH_CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+const SEARCH_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function getVectorKey(collectionName: string, vector: number[], topK: number): string {
   // Use first 8 + last 8 float values as a lightweight fingerprint
@@ -61,7 +61,7 @@ function getVectorKey(collectionName: string, vector: number[], topK: number): s
 
 /**
  * Searches a collection in Qdrant with a query vector.
- * Includes in-memory caching and optimized HNSW search parameters (hnsw_ef: 64).
+ * Includes in-memory caching and optimized HNSW search parameters (hnsw_ef: 32).
  */
 export async function search(
   collectionName: string,
@@ -80,7 +80,7 @@ export async function search(
 
   const client = getClient();
   const searchParams = {
-    hnsw_ef: 64,
+    hnsw_ef: 32,
     exact: false,
   };
 

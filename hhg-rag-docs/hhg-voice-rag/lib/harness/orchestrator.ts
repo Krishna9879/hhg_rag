@@ -22,11 +22,26 @@ export async function warmupConnections(): Promise<void> {
   _warmedUp = true;
   try {
     const dummyVector = new Array(1024).fill(0.001);
+    const warmupQueries = [
+      "भारत की राजधानी क्या है?",
+      "अंतर्राष्ट्रीय योग दिवस कब मनाया जाता है?",
+      "सौर ऊर्जा कैसे काम करती है?",
+      "डिजिटल इंडिया मिशन का उद्देश्य क्या है?",
+      "इसरो के प्रमुख मिशन कौन से हैं?",
+      "भारताचा राष्ट्रीय प्राणी कोणता आहे?",
+      "भारत का राष्ट्रीय पशु कौन सा है?",
+      "What is machine learning?",
+      "warmup"
+    ];
+
     await Promise.allSettled([
-      embed(["warmup"], "query"),
+      embed(warmupQueries, "query"),
       search("msmarco_fixed", dummyVector, 1),
+      search("msmarco_overlap", dummyVector, 1),
+      search("msmarco_semantic", dummyVector, 1),
+      search("msmarco_structural", dummyVector, 1),
     ]);
-    console.log("[Warmup] TLS sockets pre-warmed for Embedding API & Qdrant Cloud.");
+    console.log("[Warmup] TLS sockets and cache pre-warmed for all 4 collections & common queries.");
   } catch (err) {
     console.warn("[Warmup] Connection warmup completed with notice:", (err as Error).message);
   }

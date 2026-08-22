@@ -10,15 +10,15 @@ const persistentHttpsAgent = new https.Agent({
   timeout: 30000,
 });
 
-// In-memory LRU/TTL Embedding Cache (5-minute TTL, max 500 entries)
+// In-memory LRU/TTL Embedding Cache (1-hour TTL, max 2000 entries)
 interface CacheEntry {
   vector: number[];
   expiresAt: number;
 }
 
 const embeddingCache = new Map<string, CacheEntry>();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MAX_CACHE_SIZE = 500;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const MAX_CACHE_SIZE = 2000;
 
 function getCacheKey(model: string, type: string, text: string): string {
   return `${model}:${type}:${text.trim().toLowerCase()}`;
