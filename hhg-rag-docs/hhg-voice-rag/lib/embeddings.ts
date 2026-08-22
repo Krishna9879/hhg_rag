@@ -10,6 +10,8 @@ const persistentHttpsAgent = new https.Agent({
   timeout: 30000,
 });
 
+import precomputedQueryEmbeddings from "../data/precomputed_query_embeddings.json";
+
 // In-memory LRU/TTL Embedding Cache (1-hour TTL, max 2000 entries)
 interface CacheEntry {
   vector: number[];
@@ -19,6 +21,17 @@ interface CacheEntry {
 const embeddingCache = new Map<string, CacheEntry>();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 const MAX_CACHE_SIZE = 2000;
+
+// Initialize cache with precomputed vectors for instant 0ms retrieval on common queries
+if (precomputedQueryEmbeddings && typeof precomputedQueryEmbeddings === "object") {
+  const farFuture = Date.now() + 24 * 60 * 60 * 1000;
+  for (const [key, vector] of Object.entries(precomputedQueryEmbeddings)) {
+    embeddingCache.set(key, {
+      vector: vector as number[],
+      expiresAt: farFuture,
+    });
+  }
+}
 
 function normalizeText(text: string): string {
   return text.trim().toLowerCase().replace(/[.,?!।|]/g, "").replace(/\s+/g, " ");
