@@ -37,6 +37,8 @@ export async function generateChat(
       messages,
       model,
       stream: false,
+      max_tokens: 150,
+      temperature: 0,
     }, { signal });
 
     const content = response.choices[0]?.message?.content;
@@ -83,6 +85,8 @@ export async function* generateStream(
       messages,
       model,
       stream: true,
+      max_tokens: 150,
+      temperature: 0,
     }, { signal });
   } catch (error) {
     const err = error as Error;

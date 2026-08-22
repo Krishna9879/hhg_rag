@@ -5,8 +5,8 @@ import { withTimeout } from "../timeout";
 import { HarnessContext, HarnessError, StageResult } from "../types";
 import { recordStageTiming } from "../trace";
 
-const RETRIEVE_TIMEOUT_PER_COLLECTION_MS = 4000;
-const TOP_K_PER_COLLECTION = 5;
+const RETRIEVE_TIMEOUT_PER_COLLECTION_MS = 2000;
+const TOP_K_PER_COLLECTION = 3;
 
 export interface RetrievalOutput {
   resultsByStrategy: Record<string, QdrantSearchResult[]>;
@@ -36,21 +36,12 @@ export async function runRetrieveStage(
   const searchPromises = strategies.map(async ({ name, collection }) => {
     const stratStart = Date.now();
     try {
-      const results = await withRetry(
-        async () => {
-          return await withTimeout(
-            async (signal) => {
-              return await search(collection, queryVector, TOP_K_PER_COLLECTION, undefined, signal);
-            },
-            RETRIEVE_TIMEOUT_PER_COLLECTION_MS,
-            `Qdrant search (${name})`
-          );
+      const results = await withTimeout(
+        async (signal) => {
+          return await search(collection, queryVector, TOP_K_PER_COLLECTION, undefined, signal);
         },
-        {
-          attempts: 2,
-          backoffMs: [0, 80],
-          retryOn: ["UpstreamTimeout", "UpstreamError"],
-        }
+        RETRIEVE_TIMEOUT_PER_COLLECTION_MS,
+        `Qdrant search (${name})`
       );
       perStrategyMs[name] = Date.now() - stratStart;
       resultsByStrategy[name] = results;

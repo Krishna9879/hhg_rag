@@ -2,7 +2,7 @@ import { QdrantSearchResult } from "../../qdrant";
 import { HarnessContext, StageResult } from "../types";
 import { recordStageTiming } from "../trace";
 
-const FUSE_TOP_K = 5;
+const FUSE_TOP_K = 3;
 const RRF_K = 60; // Standard reciprocal rank fusion constant
 
 export interface FusedChunk {
